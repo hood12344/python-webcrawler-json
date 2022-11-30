@@ -1,0 +1,94 @@
+########## 由網路下載資料
+import sys
+import urllib.request as httplib  # 3.x
+import json
+import os
+import os.path
+import shutil
+import xlrd
+import matplotlib.pyplot as plt    # 匯入 matplotlib 程式庫
+plt.rcParams['font.sans-serif'] = ['Microsoft JhengHei']
+plt.rcParams['axes.unicode_minus'] = False  # 步驟二（解決座標軸負數的負號顯示問題）
+
+
+######### 由網路下載 JSON 的 字串
+#opendata: https://data.gov.tw/dataset/136923
+url="https://soa.tainan.gov.tw/Api/Service/Get/00693eb9-4ddc-4c40-a668-cb7210f7c742" #資料來源json格式
+req = httplib.Request( url,data=None,
+    headers={ 'User-Agent':"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36"})
+reponse = httplib.urlopen(req)               # 開啟連線動作
+if reponse.code==200:                        # 當連線正常時
+    contents=reponse.read()                  # 讀取網頁內容
+    contents=contents.decode("utf-8")        # 轉換編碼為 utf-8
+    print(contents)
+    # 儲存檔案
+    with open("data.json", "w", encoding="utf-8") as f:
+        f.write(contents)
+
+
+######### 字串 換成  JSON 的 Dict
+obj1= json.loads(contents)
+
+####台南市各區人口總數#########
+def 台南市各區人口總數():
+    list區 = []
+    list人數 = []
+
+    for id in obj1["data"]: #把json裡面data的資料放進ID
+
+        if id["性別"] =="計": #資料上 性別:計 是男女總和
+            print("區域:", id["區域別"], "人口總和:", id["總計"])
+            list區.append(id["區域別"])
+            list人數.append(int(id["總計"]))
+
+    print(list人數)
+    print(list區)
+    plt.plot(list區, list人數)  # 建立圖表 x軸(0,1,2,3) y軸[1,2,3,4]
+    plt.xlabel('區')
+    plt.ylabel('人數')
+
+####台南市各區男生比#########
+def 台南市各區男生比():
+    list區 = []
+    list人數 = []
+
+    for id in obj1["data"]: #把json裡面data的資料放進ID
+
+        if id["性別"] =="男": #資料上 性別:計 是男女總和
+            print("區域:", id["區域別"], "人口總和:", id["總計"])
+            list區.append(id["區域別"])
+            list人數.append(int(id["總計"]))
+
+    print(list人數)
+    print(list區)
+    plt.plot(list區, list人數)  # 建立圖表 x軸(0,1,2,3) y軸[1,2,3,4]
+    plt.xlabel('區')
+    plt.ylabel('人數')
+####台南市各區女生比#########
+def 台南市各區女生比():
+    list區 = []
+    list人數 = []
+
+    for id in obj1["data"]: #把json裡面data的資料放進ID
+
+        if id["性別"] =="女": #資料上 性別:計 是男女總和
+            print("區域:", id["區域別"], "人口總和:", id["總計"])
+            list區.append(id["區域別"])
+            list人數.append(int(id["總計"]))
+
+    print(list人數)
+    print(list區)
+    plt.plot(list區, list人數)  # 建立圖表 x軸(0,1,2,3) y軸[1,2,3,4]
+    plt.xlabel('區')
+    plt.ylabel('人數')
+
+fig, axs = plt.subplots(3,3)
+plt.subplot(3,1,1)
+台南市各區人口總數()
+plt.subplot(3,1,2)
+台南市各區男生比()
+plt.subplot(3,1,3)
+台南市各區女生比()
+fig.tight_layout()
+fig.suptitle( "台南市人數比例 :" )
+plt.show()
